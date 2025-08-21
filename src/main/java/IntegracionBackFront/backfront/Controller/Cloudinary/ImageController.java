@@ -33,4 +33,17 @@ public class ImageController {
 
         }
     }
+
+    @PostMapping("/upload-to-folder")
+    public ResponseEntity<?> uploadImageToFolder(
+            @RequestParam("image")MultipartFile file, @RequestParam String folder
+    ){
+        try{
+            String imageUrl = cloudService.uploadImage(file, folder);
+            return ResponseEntity.ok(Map.of("message", "Imagen subida", "url", imageUrl));
+
+        }catch (IOException e){
+            return ResponseEntity.internalServerError().body("Error al subir image");
+        }
+    }
 }

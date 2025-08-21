@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ClaudinaryService {
@@ -27,7 +28,23 @@ public class ClaudinaryService {
         Map<?,?> uploadResoult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto", "quality", "auto:good"));
         return (String) uploadResoult.get("secure_url");
     }
-
+    public String uploadImage(MultipartFile file, String folder) throws IOException{
+        validateImage(file);
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf(".")).toLowerCase();
+        String uniqueFileName ="img_"+ UUID.randomUUID() + fileExtension;
+        Map<String, Object> options = ObjectUtils.asMap(
+                "folder", folder,  /// Carpeta destino
+                "public_id", uniqueFileName, /// Nombre unico
+                "user_filename", false, //No usar el nombre original
+                "unique_filename", false, /// No genera el id unico
+                "overwrite", false, /// No sobreescribit archivos existentes
+                "resource_type", "auto",
+                "quality", "auto:good"
+        );
+        Map<?,?> uploadResoult = cloudinary.uploader().upload(file.getBytes(),options);
+        return (String) uploadResoult.get("secure_url");
+    }
     private void validateImage(MultipartFile file) {
         if(file.isEmpty()){
             throw  new IllegalArgumentException("El archivo esta vacio");
